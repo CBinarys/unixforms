@@ -2,7 +2,6 @@
 #include <X11/Xlib.h> /// X11/XLIB
 #include<stdio.h> /// stdio.h 
 #include<stdlib.h> /// stdlib.h
-#include<stdbool.h>
 /// in your example program you may choose to include the above and it will work fine, but they are already done for you, and it may slow down your program due to multiple re-including
 
 ///------------------------- GLOBAL VAR -------------------------
@@ -11,7 +10,7 @@ int xiScreen;
 Window xiWindow;
 XEvent xiEvent;
 ///------------------------- FUNCTIONS -------------------------
-int xiCreateWindow(){
+void xiCreateWindow(char *title, int width, int height){
     // Step 1: Open a connection to the X server
     xiDisplay = XOpenDisplay(NULL);
     if (!xiDisplay) {
@@ -21,7 +20,7 @@ int xiCreateWindow(){
 
     // Step 2: Create a window
     xiScreen = DefaultScreen(xiDisplay);
-    xiWindow = XCreateSimpleWindow(xiDisplay, RootWindow(xiDisplay, xiScreen),10, 10, 500, 300, 1,BlackPixel(xiDisplay, xiScreen),WhitePixel(xiDisplay, xiScreen));
+    xiWindow = XCreateSimpleWindow(xiDisplay, RootWindow(xiDisplay, xiScreen),10, 10, width, height, 1,BlackPixel(xiDisplay, xiScreen),WhitePixel(xiDisplay, xiScreen));
     // Step 4: Make the window visible
     XMapWindow(xiDisplay, xiWindow);
 
@@ -35,7 +34,7 @@ void xiDestroyWindow(){
 }
 
 void xiUpdate(){
-	while(true){
+	while(XNextEvent(xiDisplay, &xiEvent)==0){
 		
 	}
 }
