@@ -6,7 +6,7 @@
 
 ///------------------------- GLOBAL VAR -------------------------
 ///------------------------- FUNCTIONS -------------------------
-void xlCreateWindow(){
+int xiCreateWindow(){
     // Step 1: Open a connection to the X server
     Display *display = XOpenDisplay(NULL);
     if (!display) {
@@ -18,6 +18,11 @@ void xlCreateWindow(){
     int screen = DefaultScreen(display);
     Window win = XCreateSimpleWindow(display, RootWindow(display, screen),10, 10, 500, 300, 1,BlackPixel(display, screen),WhitePixel(display, screen));
 	
+}
+
+void xiDestroyWindow(){
+//  Clean up and close
+    XCloseDisplay(display);
 }
 int main() {
 
@@ -44,7 +49,5 @@ int main() {
         }
     }
 
-    // Step 6: Clean up and close
-    XCloseDisplay(display);
     return 0;
 }
