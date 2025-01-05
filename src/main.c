@@ -1,7 +1,8 @@
 #include"unixform.h"
 int main() {
-xiCreateWindow("window", 640,480);
+Window win;
+win = xiCreateWindow(640,480,"window", 0,0);
 xiUpdate();
-xiDestroyWindow();
+xiDestroyWindow(win);
     return 0;
 }
