@@ -1,5 +1,4 @@
 #include"unixform.h"
-#define RED (Color){255,0,44}
 int main() {
 Window win;
 win = xiCreateWindow(640,480,"window", 0,0);
@@ -13,8 +12,9 @@ Container con = xiCreateContainer(win, 0, 0, 100, 100, RED, false,false,"my cont
             case Expose:
                 // Handle window expose (redraw)
                 printf("Window Exposed\n");
-                xiRenderContainer(&con);
+                // xiRenderContainer(&con);
                 DrawRectangle(win, 10,10, 200, 200,RED, FILLED);
+                DrawText(win, 0,0, "haha hi you've been on my mind", BLACK);
                 break;
 
             case ButtonPress:

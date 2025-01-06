@@ -3,6 +3,7 @@
 #include<stdio.h> /// stdio.h 
 #include<stdlib.h> /// stdlib.h
 #include<stdbool.h> /// stdbool.h
+#include<string.h> /// string.h
 /// in your example program you may choose to include the above and it will work fine, but they are already done for you, and it may slow down your program due to multiple re-including
 
 ///------------------------- GLOBAL VAR -------------------------
@@ -72,6 +73,11 @@ static unsigned long convert_color_to_pixel(Color color) {
     return (color.r << 16) | (color.g << 8) | color.b;
 }
 
+// created few color constants
+#define RED (Color){255,0,0}
+#define BLACK (Color){255,255,255}
+#define GREEN (Color){0,255,0}
+#define BLUE (Color){0,0,255}
 
 GC create_graphics_context_for_coloring(Window win,Color color) {
     XGCValues values;
@@ -106,6 +112,29 @@ static void DrawRectangle(Window win, int x, int y, int w, int h,Color color, Dr
         XFreeGC(xiDisplay, gc); // Free the GC after use
 
 }
+// Function to draw text
+void DrawText(Window win, int x, int y, const char *text, Color color) {
+    // Create a graphics context for the given color
+    GC gc = create_graphics_context_for_coloring(win, color);
+
+    // Set font (optional, default font will be used if this is omitted)
+    XFontStruct *font = XLoadQueryFont(xiDisplay, "fixed");
+    if (font) {
+        XSetFont(xiDisplay, gc, font->fid);
+    } else {
+        fprintf(stderr, "Failed to load font. Using default font.\n");
+    }
+
+    // Draw the text
+    XDrawString(xiDisplay, win, gc, x, y, text, strlen(text));
+
+    // Free the font and graphics context
+    if (font) {
+        XFreeFont(xiDisplay, font);
+    }
+    XFreeGC(xiDisplay, gc);
+}
+
 
 //----------------------------------- WIDGETS --------------------------------
 void xiDrawRectangle(Window win, int x, int y, int w, int h,Color color, DrawMode mode){
@@ -117,6 +146,9 @@ typedef struct {
     int x, y;             // Position of the container widget
     int width, height;    // Size of the container widget
     Color backgroundColor; // Background color of the container
+    bool fixed;
+    bool resizable;
+    char * title;
 } Container;
 
 // Create a container window inside the main window
@@ -141,7 +173,7 @@ Container xiCreateContainer(Window parentWin, int x, int y, int width, int heigh
     // Map (show) the container window
     XMapWindow(xiDisplay, containerWin);
 
-    Container container = {containerWin, x, y, width, height, bgColor};
+    Container container = {containerWin, x, y, width, height, bgColor,fixed, resizable, title};
     return container;
 }
 
@@ -151,6 +183,11 @@ void xiRenderContainer(Container *container) {
 
         XFillRectangle(xiDisplay, container->containerWin, gc, container->x, container->y, container->width, container->height);
 
+	// logic to add title bar and render the title text, if user pass in null instead of a title then it will skip
+	if(container->title !=NULL){
+			DrawRectangle(container->containerWin,container->x, container->y, container->width, 20,BLACK, FILLED);
+			DrawText(container->containerWin,,container->title, BLACK);
+	}
     XFreeGC(xiDisplay, gc); // Free the GC after use
 }
 
