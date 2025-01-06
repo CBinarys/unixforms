@@ -104,6 +104,11 @@ static void DrawRectangle(Window win, int x, int y, int w, int h,Color color, Dr
 
 }
 
+//----------------------------------- WIDGETS --------------------------------
+void xiDrawRectangle(Window win, int x, int y, int w, int h,Color color, DrawMode mode){
+	DrawRectangle(win, x, y, w, h,color, mode);
+	// the two draw rect functions are different, users
+}
 void xiUpdate() {
     // Event loop
     while (1) {
