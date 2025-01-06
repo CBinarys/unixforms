@@ -70,11 +70,11 @@ static unsigned long convert_color_to_pixel(Color color) {
 }
 
 
-GC get_gc_for_color(Display *display, Window window, Color color) {
+GC create_graphics_context_for_coloring(Window win,Color color) {
     XGCValues values;
     values.foreground = convert_color_to_pixel(color);
 
-    GC gc = XCreateGC(display, window, GCForeground, &values);
+    GC gc = XCreateGC(xiDisplay, win, GCForeground, &values);
     return gc;
 }
 
@@ -82,27 +82,26 @@ typedef enum {
     FILLED,
     OUTLINE
 } DrawMode;
-void draw_rect(Display *display, Window window, int x, int y, int width, int height, Color color) {
-    GC gc = get_gc_for_color(display, window, color);
-    XFillRectangle(display, window, gc, x, y, width, height);
-    XFreeGC(display, gc); // Free the GC after use
-}
 
 static void DrawRectangle(Window win, int x, int y, int w, int h,Color color, DrawMode mode) {
-    if (mode == FILLED) {
-        // Draw a filled rectangle
-            GC gc = get_gc_for_color(xiDisplay, win, color);
+	// first creates a new graphics context for rendering
+    GC gc = create_graphics_context_for_coloring( win, color);
 
-        XFillRectangle(xiDisplay, win, gc, x, y, w, h);
-            XFreeGC(xiDisplay, gc); // Free the GC after use
+    if (mode == FILLED) {
+
+        XFillRectangle(xiDisplay, win, gc, x, y, w, h); // Draw a filled rectangle
 
     } else if (mode == OUTLINE) {
         // Draw an outlined rectangle
         XDrawRectangle(xiDisplay, win, gc, x, y, w, h);
+        
     } else {
         // TODO: Handle invalid mode (e.g., throw an error or log it)
         fprintf(stderr, "Invalid DrawMode\n");
     }
+
+        XFreeGC(xiDisplay, gc); // Free the GC after use
+
 }
 
 void xiUpdate() {
