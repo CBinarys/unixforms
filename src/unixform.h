@@ -78,6 +78,7 @@ static unsigned long convert_color_to_pixel(Color color) {
 #define BLACK (Color){255,255,255}
 #define GREEN (Color){0,255,0}
 #define BLUE (Color){0,0,255}
+#define GRAY (Color){128,128,128}
 
 GC create_graphics_context_for_coloring(Window win,Color color) {
     XGCValues values;
@@ -141,55 +142,66 @@ void xiDrawRectangle(Window win, int x, int y, int w, int h,Color color, DrawMod
 	DrawRectangle(win, x, y, w, h,color, mode);
 	// the two draw rect functions are different, this present rect func is more a widgets, because it registers
 }
+
 typedef struct {
-    Window containerWin;  // The container widget (a child window)
-    int x, y;             // Position of the container widget
-    int width, height;    // Size of the container widget
-    Color backgroundColor; // Background color of the container
+    Window containerWin;
+    int x, y;
+    int width, height;
+    Color backgroundColor;
     bool fixed;
     bool resizable;
-    char * title;
+    char *title;
+    bool dragging;
+    int dragStartX, dragStartY;
 } Container;
 
-// Create a container window inside the main window
-Container xiCreateContainer(Window parentWin, int x, int y, int width, int height, Color bgColor, bool fixed,bool resizable, char * title) {
-    // Create a container (child window) inside the main window (parentWin)
+Container xiCreateContainer(Window parentWin, int x, int y, int width, int height, Color bgColor, bool fixed, bool resizable, char *title) {
     XSetWindowAttributes xva;
     xva.background_pixel = convert_color_to_pixel(bgColor);
     xva.border_pixel = BlackPixel(xiDisplay, xiScreen);
-    xva.event_mask = ButtonPressMask | ExposureMask | KeyPressMask;
+    xva.event_mask = ButtonPressMask | ButtonReleaseMask | PointerMotionMask | ExposureMask;
 
     Window containerWin = XCreateWindow(
         xiDisplay, parentWin,
         x, y, width, height,
-        0,                // Border width (0 for no border)
-        DefaultDepth(xiDisplay, xiScreen),
-        InputOutput,
-        DefaultVisual(xiDisplay, xiScreen),
-        CWBackPixel | CWBorderPixel | CWEventMask,
-        &xva
-    );
+        0, DefaultDepth(xiDisplay, xiScreen),
+        InputOutput, DefaultVisual(xiDisplay, xiScreen),
+        CWBackPixel | CWBorderPixel | CWEventMask, &xva);
 
-    // Map (show) the container window
     XMapWindow(xiDisplay, containerWin);
 
-    Container container = {containerWin, x, y, width, height, bgColor,fixed, resizable, title};
+    Container container = {containerWin, x, y, width, height, bgColor, fixed, resizable, title, false, 0, 0};
     return container;
 }
 
 void xiRenderContainer(Container *container) {
-    // Create a graphics context for the container
     GC gc = create_graphics_context_for_coloring(container->containerWin, container->backgroundColor);
-
-        XFillRectangle(xiDisplay, container->containerWin, gc, container->x, container->y, container->width, container->height);
-
-	// logic to add title bar and render the title text, if user pass in null instead of a title then it will skip
-	if(container->title !=NULL){
-			DrawRectangle(container->containerWin,container->x, container->y, container->width, 20,BLACK, FILLED);
-			DrawText(container->containerWin,3+container->x, 3+container->y,container->title, BLACK);
-	}
-    XFreeGC(xiDisplay, gc); // Free the GC after use
+    XFillRectangle(xiDisplay, container->containerWin, gc, 0, 0, container->width, container->height);
+    if (container->title) {
+        DrawRectangle(container->containerWin, 0, 0, container->width, 20, BLACK, FILLED);
+        DrawText(container->containerWin, 5, 15, container->title, GRAY);
+    }
+    XFreeGC(xiDisplay, gc);
 }
+
+void xiHandleContainerEvents(Container *container, XEvent *event) {
+    if (!container->fixed && event->type == ButtonPress && event->xbutton.y < 20) {
+        container->dragging = true;
+        container->dragStartX = event->xbutton.x_root;
+        container->dragStartY = event->xbutton.y_root;
+    } else if (event->type == ButtonRelease) {
+        container->dragging = false;
+    } else if (container->dragging && event->type == MotionNotify) {
+        int dx = event->xmotion.x_root - container->dragStartX;
+        int dy = event->xmotion.y_root - container->dragStartY;
+        container->x += dx;
+        container->y += dy;
+        XMoveWindow(xiDisplay, container->containerWin, container->x, container->y);
+        container->dragStartX = event->xmotion.x_root;
+        container->dragStartY = event->xmotion.y_root;
+    }
+}
+
 
 void xiUpdate() {
     // Event loop

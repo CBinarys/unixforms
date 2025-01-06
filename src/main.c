@@ -2,7 +2,7 @@
 int main() {
 Window win;
 win = xiCreateWindow(640,480,"window", 0,0);
-Container con = xiCreateContainer(win, 0, 0, 100, 100, RED, false,false,"my container");
+Container con = xiCreateContainer(win, 200, 200, 320, 240, GRAY, false,false,"my container");
 
     // Event loop
     while (1) {
@@ -12,8 +12,8 @@ Container con = xiCreateContainer(win, 0, 0, 100, 100, RED, false,false,"my cont
             case Expose:
                 // Handle window expose (redraw)
                 printf("Window Exposed\n");
-                // xiRenderContainer(&con);
-                DrawRectangle(win, 10,10, 200, 200,RED, FILLED);
+                 xiRenderContainer(&con);
+                DrawRectangle(win, 10,10, 200, 20,RED, FILLED);
                 DrawText(win, 30,100, "haha hi you've been on my mind", GREEN);
                 break;
 
@@ -22,7 +22,9 @@ Container con = xiCreateContainer(win, 0, 0, 100, 100, RED, false,false,"my cont
                 printf("Mouse button pressed at (%d, %d)\n",
                     xiEvent.xbutton.x, xiEvent.xbutton.y);
                 break;
-
+            case MotionNotify:
+                xiHandleContainerEvents(&con, &xiEvent);
+                break;
             case KeyPress:
                 // Handle key press
                 printf("Key pressed\n");
