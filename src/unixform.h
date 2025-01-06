@@ -186,7 +186,7 @@ void xiRenderContainer(Container *container) {
 	// logic to add title bar and render the title text, if user pass in null instead of a title then it will skip
 	if(container->title !=NULL){
 			DrawRectangle(container->containerWin,container->x, container->y, container->width, 20,BLACK, FILLED);
-			DrawText(container->containerWin,,container->title, BLACK);
+			DrawText(container->containerWin,3+container->x, 3+container->y,container->title, BLACK);
 	}
     XFreeGC(xiDisplay, gc); // Free the GC after use
 }

@@ -14,7 +14,7 @@ Container con = xiCreateContainer(win, 0, 0, 100, 100, RED, false,false,"my cont
                 printf("Window Exposed\n");
                 // xiRenderContainer(&con);
                 DrawRectangle(win, 10,10, 200, 200,RED, FILLED);
-                DrawText(win, 0,0, "haha hi you've been on my mind", BLACK);
+                DrawText(win, 30,100, "haha hi you've been on my mind", GREEN);
                 break;
 
             case ButtonPress:
