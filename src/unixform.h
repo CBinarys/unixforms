@@ -11,6 +11,8 @@ Window xiRoot;
 XEvent xiEvent;
 
 ///------------------------- FUNCTIONS -------------------------
+//------------------------- window --------------------------
+
 Window xiCreateWindow(int width, int height, char *title, int xpos, int ypos) {
     // Open the display if not already opened
     if ((xiDisplay = XOpenDisplay(NULL)) == NULL) {
@@ -54,18 +56,49 @@ void xiDestroyWindow(Window win) {
     XDestroyWindow(xiDisplay, win);
     XCloseDisplay(xiDisplay);
 }
+
+//------------------------- colors, rendering, shapes and graphics context --------------------------
+typedef struct {
+    unsigned char r; // 0-255
+    unsigned char g; // 0-255
+    unsigned char b; // 0-255
+} Color;
+
+// Converts 8-bit color to 16-bit for Xlib
+static unsigned long convert_color_to_pixel(Color color) {
+    return (color.r << 16) | (color.g << 8) | color.b;
+}
+
+
+GC get_gc_for_color(Display *display, Window window, Color color) {
+    XGCValues values;
+    values.foreground = convert_color_to_pixel(color);
+
+    GC gc = XCreateGC(display, window, GCForeground, &values);
+    return gc;
+}
+
 typedef enum {
     FILLED,
     OUTLINE
 } DrawMode;
+void draw_rect(Display *display, Window window, int x, int y, int width, int height, Color color) {
+    GC gc = get_gc_for_color(display, window, color);
+    XFillRectangle(display, window, gc, x, y, width, height);
+    XFreeGC(display, gc); // Free the GC after use
+}
 
-void DrawRectangle(Display *display, GC gc, Window win, int x, int y, int w, int h, DrawMode mode) {
+static void DrawRectangle(Window win, int x, int y, int w, int h,Color color, DrawMode mode) {
     if (mode == FILLED) {
         // Draw a filled rectangle
-        XFillRectangle(display, win, gc, x, y, w, h);
+            GC gc = get_gc_for_color(xiDisplay, win, color);
+
+        XFillRectangle(xiDisplay, win, gc, x, y, w, h);
+            XFreeGC(xiDisplay, gc); // Free the GC after use
+
     } else if (mode == OUTLINE) {
         // Draw an outlined rectangle
-        XDrawRectangle(display, win, gc, x, y, w, h);
+        XDrawRectangle(xiDisplay, win, gc, x, y, w, h);
     } else {
         // TODO: Handle invalid mode (e.g., throw an error or log it)
         fprintf(stderr, "Invalid DrawMode\n");
