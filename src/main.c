@@ -3,6 +3,8 @@
 int main() {
 Window win;
 win = xiCreateWindow(640,480,"window", 0,0);
+Container con = xiCreateContainer(win, 0, 0, 100, 100, RED, false,false,"my container");
+
     // Event loop
     while (1) {
         XNextEvent(xiDisplay, &xiEvent);
@@ -11,6 +13,7 @@ win = xiCreateWindow(640,480,"window", 0,0);
             case Expose:
                 // Handle window expose (redraw)
                 printf("Window Exposed\n");
+                xiRenderContainer(&con);
                 DrawRectangle(win, 10,10, 200, 200,RED, FILLED);
                 break;
 
