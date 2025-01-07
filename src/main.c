@@ -11,7 +11,7 @@ Container con = xiCreateContainer(&win, 200, 200, 320, 240, GRAY, false,"my cont
 	            case Expose:
 	                xiRenderContainer(&con);
 	            	xiDrawRectangle(&win, 10,10, 200, 20,RED, FILLED);
-	            	xiDrawRectangle(&con, 10,10, 200, 20,RED, FILLED);
+	            	xiDrawRectangle(&con, 0,0, 200, 20,RED, FILLED);
 	                xiDrawText(&win, 30,100, "haha hi you've been on my mind", GREEN);
 	                printf("Window Exposed\n");
 	                break;

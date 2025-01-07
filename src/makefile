@@ -1,5 +1,5 @@
 CC = gcc
-SRC = main.c
+SRC = new1.c
 EXE = main
 LIBS = -lX11
 

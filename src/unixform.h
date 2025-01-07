@@ -198,31 +198,33 @@ void xiHandleContainerEvents(Container *container, XEvent *event) {
 }
 
 //-----
-Window getWindowAndAdjustCoords(void *winOrContainer, int x, int y, int *newX, int *newY) {
+bool getWindowAndAdjustCoords(void *winOrContainer, Window *outWindow) {
     Container *container = (Container *)winOrContainer;
 
     if (container->containerWin) { // Check if it's a Container
-        // Adjust coordinates for the container's absolute position
-        *newX = x + container->x;
-        *newY = y + container->y;
-        return container->containerWin;
+        *outWindow = container->containerWin;
+        return true; // It's a Container
     }
 
-    // Otherwise, it's a Window; coordinates remain unchanged
-    *newX = x;
-    *newY = y;
-    return *(Window *)winOrContainer;
+    // Otherwise, it's a Window
+    *outWindow = *(Window *)winOrContainer;
+    return false; // It's a Window
 }
 
 //----------------------------------- WIDGETS --------------------------------
 void xiDrawRectangle(void *winOrContainer, int x, int y, int w, int h, Color color, DrawMode mode) {
-    int adjustedX, adjustedY;
+    Window actualWin;
+    bool isContainer = getWindowAndAdjustCoords(winOrContainer, &actualWin);
 
-    // Get the actual Window and adjusted coordinates
-    Window actualWin = getWindowAndAdjustCoords(winOrContainer, x, y, &adjustedX, &adjustedY);
+    // If it's a Container, adjust the coordinates using container's position
+    if (isContainer) {
+        Container *container = (Container *)winOrContainer;
+        x += container->x;
+        y += container->y;
+    }
 
-    // Draw the rectangle with adjusted coordinates
-    DrawRectangle(actualWin, adjustedX, adjustedY, w, h, color, mode);
+    // Draw the rectangle with the resolved coordinates
+    DrawRectangle(actualWin, x, y, w, h, color, mode);
 }
 
 void xiDrawText(Window *win, int x, int y, const char *text, Color color){
