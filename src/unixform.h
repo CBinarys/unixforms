@@ -52,10 +52,10 @@ Window xiCreateWindow(int width, int height, char *title, int xpos, int ypos) {
     return win;
 }
 
-void xiDestroyWindow(Window win) {
+void xiDestroyWindow(Window *win) {
     // Clean up and close
-    XUnmapWindow(xiDisplay, win);
-    XDestroyWindow(xiDisplay, win);
+    XUnmapWindow(xiDisplay, *win);
+    XDestroyWindow(xiDisplay,* win);
     XCloseDisplay(xiDisplay);
 }
 
@@ -114,7 +114,7 @@ static void DrawRectangle(Window win, int x, int y, int w, int h,Color color, Dr
 
 }
 // Function to draw text
-void DrawText(Window win, int x, int y, const char *text, Color color) {
+static void DrawText(Window win, int x, int y, const char *text, Color color) {
     // Create a graphics context for the given color
     GC gc = create_graphics_context_for_coloring(win, color);
 
@@ -138,11 +138,13 @@ void DrawText(Window win, int x, int y, const char *text, Color color) {
 
 
 //----------------------------------- WIDGETS --------------------------------
-void xiDrawRectangle(Window win, int x, int y, int w, int h,Color color, DrawMode mode){
-	DrawRectangle(win, x, y, w, h,color, mode);
+void xiDrawRectangle(Window* win, int x, int y, int w, int h,Color color, DrawMode mode){
+	DrawRectangle(*win, x, y, w, h,color, mode);
 	// the two draw rect functions are different, this present rect func is more a widgets, because it registers
 }
-
+void xiDrawText(Window *win, int x, int y, const char *text, Color color){
+	DrawText(*win, x, y, text, color);
+}
 typedef struct {
     Window containerWin;
     int x, y;
@@ -154,14 +156,14 @@ typedef struct {
     int dragStartX, dragStartY;
 } Container;
 
-Container xiCreateContainer(Window parentWin, int x, int y, int width, int height, Color bgColor, bool fixed, char *title) {
+Container xiCreateContainer(Window *parentWin, int x, int y, int width, int height, Color bgColor, bool fixed, char *title) {
     XSetWindowAttributes xva;
     xva.background_pixel = convert_color_to_pixel(bgColor);
     xva.border_pixel = BlackPixel(xiDisplay, xiScreen);
     xva.event_mask = ButtonPressMask | ButtonReleaseMask | PointerMotionMask | ExposureMask;
 
     Window containerWin = XCreateWindow(
-        xiDisplay, parentWin,
+        xiDisplay, *parentWin,
         x, y, width, height,
         0, DefaultDepth(xiDisplay, xiScreen),
         InputOutput, DefaultVisual(xiDisplay, xiScreen),

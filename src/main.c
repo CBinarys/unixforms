@@ -2,7 +2,7 @@
 int main() {
 Window win;
 win = xiCreateWindow(640,480,"window", 0,0);
-Container con = xiCreateContainer(win, 200, 200, 320, 240, GRAY, false,"my container");
+Container con = xiCreateContainer(&win, 200, 200, 320, 240, GRAY, false,"my container");
 
 // Event loop
 	while (1) {
@@ -10,8 +10,8 @@ Container con = xiCreateContainer(win, 200, 200, 320, 240, GRAY, false,"my conta
         	switch (xiEvent.type) {
 	            case Expose:
 	                xiRenderContainer(&con);
-	            	DrawRectangle(win, 10,10, 200, 20,RED, FILLED);
-	                DrawText(win, 30,100, "haha hi you've been on my mind", GREEN);
+	            	xiDrawRectangle(&win, 10,10, 200, 20,RED, FILLED);
+	                xiDrawText(&win, 30,100, "haha hi you've been on my mind", GREEN);
 	                printf("Window Exposed\n");
 	                break;
 	            case ButtonPress:
@@ -23,6 +23,6 @@ Container con = xiCreateContainer(win, 200, 200, 320, 240, GRAY, false,"my conta
 	                break;
         }
     }
-xiDestroyWindow(win);
+xiDestroyWindow(&win);
     return 0;
 }
