@@ -75,7 +75,7 @@ static unsigned long convert_color_to_pixel(Color color) {
 
 // created few color constants
 #define RED (Color){255,0,0}
-#define BLACK (Color){255,255,255}
+#define BLACK (Color){0,0,0}
 #define GREEN (Color){0,255,0}
 #define BLUE (Color){0,0,255}
 #define GRAY (Color){128,128,128}
@@ -149,13 +149,12 @@ typedef struct {
     int width, height;
     Color backgroundColor;
     bool fixed;
-    bool resizable;
     char *title;
     bool dragging;
     int dragStartX, dragStartY;
 } Container;
 
-Container xiCreateContainer(Window parentWin, int x, int y, int width, int height, Color bgColor, bool fixed, bool resizable, char *title) {
+Container xiCreateContainer(Window parentWin, int x, int y, int width, int height, Color bgColor, bool fixed, char *title) {
     XSetWindowAttributes xva;
     xva.background_pixel = convert_color_to_pixel(bgColor);
     xva.border_pixel = BlackPixel(xiDisplay, xiScreen);
@@ -170,13 +169,14 @@ Container xiCreateContainer(Window parentWin, int x, int y, int width, int heigh
 
     XMapWindow(xiDisplay, containerWin);
 
-    Container container = {containerWin, x, y, width, height, bgColor, fixed, resizable, title, false, 0, 0};
+    Container container = {containerWin, x, y, width, height, bgColor, fixed, title, false, 0, 0};
     return container;
 }
 
 void xiRenderContainer(Container *container) {
     GC gc = create_graphics_context_for_coloring(container->containerWin, container->backgroundColor);
     XFillRectangle(xiDisplay, container->containerWin, gc, 0, 0, container->width, container->height);
+    // if a string title was passed in instead of null, it should draw the title bar and render the title string else ignore
     if (container->title) {
         DrawRectangle(container->containerWin, 0, 0, container->width, 20, BLACK, FILLED);
         DrawText(container->containerWin, 5, 15, container->title, GRAY);
@@ -205,28 +205,5 @@ void xiHandleContainerEvents(Container *container, XEvent *event) {
 
 void xiUpdate() {
     // Event loop
-    while (1) {
-        XNextEvent(xiDisplay, &xiEvent);
 
-        switch (xiEvent.type) {
-            case Expose:
-                // Handle window expose (redraw)
-                printf("Window Exposed\n");
-                break;
-
-            case ButtonPress:
-                // Handle button press
-                printf("Mouse button pressed at (%d, %d)\n",
-                    xiEvent.xbutton.x, xiEvent.xbutton.y);
-                break;
-
-            case KeyPress:
-                // Handle key press
-                printf("Key pressed\n");
-                break;
-
-            default:
-                break;
-        }
-    }
 }
