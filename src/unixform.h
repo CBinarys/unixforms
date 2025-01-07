@@ -137,14 +137,7 @@ static void DrawText(Window win, int x, int y, const char *text, Color color) {
 }
 
 
-//----------------------------------- WIDGETS --------------------------------
-void xiDrawRectangle(Window* win, int x, int y, int w, int h,Color color, DrawMode mode){
-	DrawRectangle(*win, x, y, w, h,color, mode);
-	// the two draw rect functions are different, this present rect func is more a widgets, because it registers
-}
-void xiDrawText(Window *win, int x, int y, const char *text, Color color){
-	DrawText(*win, x, y, text, color);
-}
+//-------
 typedef struct {
     Window containerWin;
     int x, y;
@@ -204,6 +197,37 @@ void xiHandleContainerEvents(Container *container, XEvent *event) {
     }
 }
 
+//-----
+Window getWindowAndAdjustCoords(void *winOrContainer, int x, int y, int *newX, int *newY) {
+    Container *container = (Container *)winOrContainer;
+
+    if (container->containerWin) { // Check if it's a Container
+        // Adjust coordinates for the container's absolute position
+        *newX = x + container->x;
+        *newY = y + container->y;
+        return container->containerWin;
+    }
+
+    // Otherwise, it's a Window; coordinates remain unchanged
+    *newX = x;
+    *newY = y;
+    return *(Window *)winOrContainer;
+}
+
+//----------------------------------- WIDGETS --------------------------------
+void xiDrawRectangle(void *winOrContainer, int x, int y, int w, int h, Color color, DrawMode mode) {
+    int adjustedX, adjustedY;
+
+    // Get the actual Window and adjusted coordinates
+    Window actualWin = getWindowAndAdjustCoords(winOrContainer, x, y, &adjustedX, &adjustedY);
+
+    // Draw the rectangle with adjusted coordinates
+    DrawRectangle(actualWin, adjustedX, adjustedY, w, h, color, mode);
+}
+
+void xiDrawText(Window *win, int x, int y, const char *text, Color color){
+	DrawText(*win, x, y, text, color);
+}
 
 void xiUpdate() {
     // Event loop
